@@ -76,3 +76,36 @@ def start_screen():
                 MAX_SCORE = 60
                 return
         pygame.display.flip()
+
+
+# экран паузы
+def pause_screen():
+    pause_text = ["                      PAUSED", "", "", "", "",
+                  "  Управление:",
+                  "  W или SPACE - прыжок",
+                  "  A, D - ходьба", "",
+                  "  НАЖМИТЕ ENTER, ЧТОБЫ ПРОДОЛЖИТЬ."]
+    fon = pygame.transform.scale(pygame.image.load('Images/fon.jpg'), (WIN_WIDTH, WIN_HEIGHT))
+    screen.blit(fon, (0, 0))
+    text_coord = 60
+    for line in pause_text:
+        if pause_text[0] == line:
+            font = pygame.font.Font(None, 60)
+        else:
+            font = pygame.font.Font(None, 30)
+        string_rendered = font.render(line, True, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
