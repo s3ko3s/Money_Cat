@@ -155,3 +155,24 @@ def camera_configure(camera, target_rect):
     t = min(0, t)
 
     return Rect(l, t, w, h)
+
+
+# Если выйграл - открывать эту форму
+class VictoryForm(QMainWindow):
+    def __init__(self, time, score, attempts):
+        super().__init__()
+        self.setFixedSize(500, 500)
+        uic.loadUi('victory.ui', self)
+        self.time_str = str(time)
+        self.score_str = str(score)
+        self.attempts_str = str(attempts)
+        self.level = str(level)
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('VICTORY!')
+        self.score.setText(self.score_str)
+        self.time.setText(self.time_str)
+        self.attempts.setText(self.attempts_str)
+        self.pushButton.clicked.connect(self.saveResult)
+        self.pushButton_2.clicked.connect(self.cancel)
