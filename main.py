@@ -111,6 +111,23 @@ def pause_screen():
         pygame.display.flip()
 
 
+# пауза
+def pause():
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pause_screen()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            paused = False
+
+        pygame.display.update()
+
 
 # камера перемещения
 class Camera(object):
