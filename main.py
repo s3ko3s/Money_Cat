@@ -176,3 +176,24 @@ class VictoryForm(QMainWindow):
         self.attempts.setText(self.attempts_str)
         self.pushButton.clicked.connect(self.saveResult)
         self.pushButton_2.clicked.connect(self.cancel)
+
+     # кнопка сохранения результата в БД
+    def saveResult(self):
+        con = sqlite3.connect("results.sqlite")
+        sql = f"""INSERT INTO players (player_name,
+                                        level,
+                                        time,
+                                        attempts)
+                            VALUES ('{self.lineEdit.text()}',
+                                    '{LEVEL}',
+                                    '{self.time_str}',  
+                                    '{self.attempts_str}')"""
+        cur = con.cursor()
+        cur.execute(sql)
+        con.commit()
+        cur.close()
+        self.close()
+
+        # кнопка отмены
+    def cancel(self):
+        terminate()
