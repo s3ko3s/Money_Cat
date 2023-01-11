@@ -177,6 +177,7 @@ class VictoryForm(QMainWindow):
         self.pushButton.clicked.connect(self.saveResult)
         self.pushButton_2.clicked.connect(self.cancel)
 
+
      # кнопка сохранения результата в БД
     def saveResult(self):
         con = sqlite3.connect("results.sqlite")
@@ -194,6 +195,15 @@ class VictoryForm(QMainWindow):
         cur.close()
         self.close()
 
-        # кнопка отмены
+    # кнопка отмены
     def cancel(self):
         terminate()
+
+
+# функция, чтобы писать текст
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, pygame.Color("WHITE"))
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
