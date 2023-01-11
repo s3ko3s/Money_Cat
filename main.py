@@ -207,3 +207,23 @@ def draw_text(surf, text, size, x, y):
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
+
+
+# прорисовка уровня
+def loadLevel():
+    global LEVEL
+    # проверка на наличие файла
+    try:
+        levelFile = open(f"Levels/level{LEVEL}.txt")
+        line = " "
+        while line[0] != "/":  # пока не нашли символ завершения файла
+            line = levelFile.readline()  # считываем построчно
+            if line.rstrip() == '[':  # если нашли символ начала уровня
+                while line[0] != "]":  # то, пока не нашли символ конца уровня
+                    line = levelFile.readline()  # считываем построчно уровень
+                    if line[0] != "]":  # и если нет символа конца уровня
+                        endLine = line.find("|")  # то ищем символ конца строки
+                        level.append(line[0: endLine])  # и добавляем в уровень строку от начала до символа "|"
+    except:
+        print("NO SUCH FILE EXISTING!")
+        terminate()
