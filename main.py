@@ -349,3 +349,9 @@ class Victory:
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+if __name__ == "__main__":
+    start_screen()
+    main()
+
