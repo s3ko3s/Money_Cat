@@ -227,3 +227,100 @@ def loadLevel():
     except:
         print("NO SUCH FILE EXISTING!")
         terminate()
+
+
+# основная функция
+def main():
+    global MAX_SCORE
+    hero = Player(55, 70)  # создаем героя
+    entities.add(hero)
+    bg = Surface((WIN_WIDTH, WIN_HEIGHT))  # задний фон
+    bg.fill(Color(BACKGROUND_COLOR))
+    left = right = False
+    up = False
+    # загружаем файл с уровнем
+    loadLevel()
+    # прорисовка уровня
+    x = y = 0
+    for row in level:
+        for col in row:
+            if col == "-":
+                pf = Platform(x, y)
+                entities.add(pf)
+                platforms.append(pf)
+
+            x += PLATFORM_WIDTH
+            if col == "*":
+                bd = BlockDie(x, y)
+                entities.add(bd)
+                platforms.append(bd)
+            if col == "=":
+                bd = BlockDieUp(x, y)
+                entities.add(bd)
+                platforms.append(bd)
+            if col == "+":
+                coin = Coin(x, y)
+                entities.add(coin)
+                platforms.append(coin)
+        y += PLATFORM_HEIGHT  # Ñ‚Ð¾ Ð¶Ðµ Ñ�Ð°Ð¼Ð¾Ðµ Ð¸ Ñ� Ð²Ñ‹Ñ�Ð¾Ñ‚Ð¾Ð¹
+        x = 0
+
+    timer = pygame.time.Clock()
+
+    total_level_width = len(level[0]) * PLATFORM_WIDTH
+    total_level_height = len(level) * PLATFORM_HEIGHT
+    # создание камеры
+    camera = Camera(camera_configure, total_level_width, total_level_height)
+    victory = False  # проверка на победу
+    vic = Victory()
+    pl = Play()
+    run = True
+    while run:  # Основной цикл
+        timer.tick(60)
+        if hero.score == MAX_SCORE:
+            victory = True  # если определенное кол-во очков - победа
+        for e in pygame.event.get():
+            if e.type == QUIT:
+                run = False
+            # физика героя
+            if e.type == KEYDOWN and e.key == K_ESCAPE:
+                left = False
+                right = False
+                up = False
+                hero.update(left, right, up, platforms, entities)
+                pause()
+
+            if e.type == KEYDOWN and (e.key == K_SPACE or e.key == K_w):
+                up = True
+
+            if e.type == KEYUP and (e.key == K_SPACE or e.key == K_w):
+                up = False
+
+            if e.type == KEYDOWN and e.key == K_a:
+                left = True
+            if e.type == KEYDOWN and e.key == K_d:
+                right = True
+
+            if e.type == KEYUP and e.key == K_d:
+                right = False
+            if e.type == KEYUP and e.key == K_a:
+                left = False
+
+        pl.update_timer()
+        # если победа - вывести окно сохранения результатов
+        if victory:
+            app = QApplication(sys.argv)
+            ex = VictoryForm(vic.pin_up_timer(), MAX_SCORE, hero.deaths + 1)
+            pygame.quit()
+            ex.show()
+            sys.exit(app.exec_())
+
+        screen.blit(bg, (0, 0))
+        hero.update(left, right, up, platforms, entities)  # обновляем героя
+        camera.update(hero)  # обновляем камеру героя
+        for e in entities:  # прорисовка каждого спрайта в группе enteties
+            screen.blit(e.image, camera.apply(e))
+        # отображение на экране кол-ва попыток, очки и уровень
+        draw_text(screen, f"Level {LEVEL}" + "    " + "Attempts: " + str(hero.deaths + 1) \
+                  + '        ' + "Score: " + str(hero.score), 24, WIN_WIDTH / 2, 5)
+        pygame.display.update()  # обновляем экран
