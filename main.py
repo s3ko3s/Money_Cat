@@ -262,7 +262,7 @@ def main():
                 coin = Coin(x, y)
                 entities.add(coin)
                 platforms.append(coin)
-        y += PLATFORM_HEIGHT
+        y += PLATFORM_HEIGHT  # Ñ‚Ð¾ Ð¶Ðµ Ñ�Ð°Ð¼Ð¾Ðµ Ð¸ Ñ� Ð²Ñ‹Ñ�Ð¾Ñ‚Ð¾Ð¹
         x = 0
 
     timer = pygame.time.Clock()
@@ -324,29 +324,3 @@ def main():
         draw_text(screen, f"Level {LEVEL}" + "    " + "Attempts: " + str(hero.deaths + 1) \
                   + '        ' + "Score: " + str(hero.score), 24, WIN_WIDTH / 2, 5)
         pygame.display.update()
-
-
-# два класса, чтобы определить время до победы
-class Play:
-    def __init__(self):
-        self.time = pygame.time.get_ticks()
-        self.end_time = 0
-
-    def update_timer(self):
-        self.time = pygame.time.get_ticks()
-        self.end_time += self.time / 1000
-        return self.end_time
-
-
-class Victory:
-    def __init__(self):
-        self.play = Play()
-
-    def pin_up_timer(self):
-        return self.play.update_timer()
-
-
-# shutdown
-def terminate():
-    pygame.quit()
-    sys.exit()
