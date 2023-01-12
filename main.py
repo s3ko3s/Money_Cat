@@ -324,3 +324,28 @@ def main():
         draw_text(screen, f"Level {LEVEL}" + "    " + "Attempts: " + str(hero.deaths + 1) \
                   + '        ' + "Score: " + str(hero.score), 24, WIN_WIDTH / 2, 5)
         pygame.display.update()
+
+
+# два класса, чтобы определить время до победы
+class Play:
+    def __init__(self):
+        self.time = pygame.time.get_ticks()
+        self.end_time = 0
+
+    def update_timer(self):
+        self.time = pygame.time.get_ticks()
+        self.end_time += self.time / 1000
+        return self.end_time
+
+
+class Victory:
+    def __init__(self):
+        self.play = Play()
+
+    def pin_up_timer(self):
+        return self.play.update_timer()
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
