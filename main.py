@@ -262,7 +262,7 @@ def main():
                 coin = Coin(x, y)
                 entities.add(coin)
                 platforms.append(coin)
-        y += PLATFORM_HEIGHT  # Ñ‚Ð¾ Ð¶Ðµ Ñ�Ð°Ð¼Ð¾Ðµ Ð¸ Ñ� Ð²Ñ‹Ñ�Ð¾Ñ‚Ð¾Ð¹
+        y += PLATFORM_HEIGHT
         x = 0
 
     timer = pygame.time.Clock()
