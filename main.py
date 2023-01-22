@@ -4,7 +4,8 @@ from player import Player
 from blocks import Platform, BlockDie, BlockDieUp, Coin
 import sys
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel
+from PyQt5.QtGui import QFont
 import sqlite3
 
 pygame.init()
@@ -142,7 +143,6 @@ class Camera(object):
         self.state = self.camera_func(self.state, target.rect)
 
 
-
 # конфигурация камеры
 def camera_configure(camera, target_rect):
     l, t, _, _ = target_rect
@@ -159,14 +159,25 @@ def camera_configure(camera, target_rect):
 
 # Если выйграл - открывать эту форму
 class VictoryForm(QMainWindow):
-    def __init__(self, time, score, attempts):
+    def __init__(self, time, score, attempts, leaderboard):
         super().__init__()
-        self.setFixedSize(500, 500)
+        self.setFixedSize(600, 700)
         uic.loadUi('victory.ui', self)
         self.time_str = str(time)
         self.score_str = str(score)
         self.attempts_str = str(attempts)
         self.level = str(level)
+        
+        self.label_6 = QLabel("LEADERBOARD:", self)
+        self.label_6.move(30, 450)
+        self.label_6.setFont(QFont('Showcard Gothic', pointSize=14))
+        self.label_6.setFixedSize(200,31)
+        
+        self.label_7 = QLabel(leaderboard, self)
+        self.label_7.move(30, 480)
+        self.label_7.setFont(QFont('Showcard Gothic', pointSize=10))
+        self.label_7.setFixedSize(200,100)
+
         self.initUI()
 
     def initUI(self):
@@ -177,18 +188,17 @@ class VictoryForm(QMainWindow):
         self.pushButton.clicked.connect(self.saveResult)
         self.pushButton_2.clicked.connect(self.cancel)
 
-
-     # кнопка сохранения результата в БД
+    # кнопка сохранения результата в БД
     def saveResult(self):
         con = sqlite3.connect("results.sqlite")
         sql = f"""INSERT INTO players (player_name,
-                                        level,
-                                        time,
-                                        attempts)
-                            VALUES ('{self.lineEdit.text()}',
-                                    '{LEVEL}',
-                                    '{self.time_str}',  
-                                    '{self.attempts_str}')"""
+                                       level,
+                                       time,
+                                       attempts)
+                           VALUES ('{self.lineEdit.text()}',
+                                   '{LEVEL}',
+                                   '{self.time_str}',  
+                                   '{self.attempts_str}')"""
         cur = con.cursor()
         cur.execute(sql)
         con.commit()
@@ -216,14 +226,14 @@ def loadLevel():
     try:
         levelFile = open(f"Levels/level{LEVEL}.txt")
         line = " "
-        while line[0] != "/":
-            line = levelFile.readline()
-            if line.rstrip() == '[':
-                while line[0] != "]":
-                    line = levelFile.readline()
-                    if line[0] != "]":
-                        endLine = line.find("|")
-                        level.append(line[0: endLine])
+        while line[0] != "/":  # пока не нашли символ завершения файла
+            line = levelFile.readline()  # считываем построчно
+            if line.rstrip() == '[':  # если нашли символ начала уровня
+                while line[0] != "]":  # то, пока не нашли символ конца уровня
+                    line = levelFile.readline()  # считываем построчно уровень
+                    if line[0] != "]":  # и если нет символа конца уровня
+                        endLine = line.find("|")  # то ищем символ конца строки
+                        level.append(line[0: endLine])  # и добавляем в уровень строку от начала до символа "|"
     except:
         print("NO SUCH FILE EXISTING!")
         terminate()
@@ -310,7 +320,50 @@ def main():
         # если победа - вывести окно сохранения результатов
         if victory:
             app = QApplication(sys.argv)
-            ex = VictoryForm(vic.pin_up_timer(), MAX_SCORE, hero.deaths + 1)
+
+            con = sqlite3.connect("results.sqlite")
+            cur = con.cursor()
+            cur.execute(f"SELECT * FROM players WHERE level='{LEVEL}'")
+            data = cur.fetchall()
+
+            leaderboard = {}  # ["username", attempts, time]
+            for u in data:
+                if len(leaderboard) > 5:
+                    for leader in leaderboard:
+                        lead = leaderboard[leader]
+
+                        if lead[1] > u[4]:
+                            leaderboard[leader] = [u[2], u[4], u[3]]
+
+                        elif lead[1] == u[4] and lead[2] > u[3]:
+                            leaderboard[leader] = [u[2], u[4], u[3]]
+
+                else:
+                    for leader in leaderboard:
+                        lead = leaderboard[leader]
+
+                        if lead[1] > u[4]:
+                            leaderboard[len(leaderboard) + 1] = lead
+                            leaderboard[leader] = [u[2], u[4], u[3]]
+                            break
+
+                        elif lead[1] == u[4] and lead[2] > u[3]:
+                            leaderboard[len(leaderboard) + 1] = lead
+                            leaderboard[leader] = [u[2], u[4], u[3]]
+                            break
+
+                    else:
+                        leaderboard[len(leaderboard) + 1] = [u[2], u[4], u[3]]
+
+            leaders = ""
+            c = 0
+            for leader in leaderboard:
+                c += 1
+                leader = leaderboard[leader]
+
+                leaders += f"{c}. {leader[0]}\n"
+
+            ex = VictoryForm(vic.pin_up_timer(), MAX_SCORE, hero.deaths + 1, leaders)
             pygame.quit()
             ex.show()
             sys.exit(app.exec_())
@@ -346,6 +399,7 @@ class Victory:
         return self.play.update_timer()
 
 
+# shutdown
 def terminate():
     pygame.quit()
     sys.exit()
@@ -354,4 +408,3 @@ def terminate():
 if __name__ == "__main__":
     start_screen()
     main()
-
